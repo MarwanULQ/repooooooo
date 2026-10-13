@@ -1,0 +1,6 @@
+- name: Bootstrap EC2
+  hosts: web
+  become: true
+
+  roles:
+    - docker
