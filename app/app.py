@@ -6,8 +6,7 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return """
-    <body style="background:#111a31; color:#b8c2d6;
-    font-family:Arial; padding:40px;">
+    <body>
         <p>Hello, World!</p>
     </body>
     """
