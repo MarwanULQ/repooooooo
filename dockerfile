@@ -14,4 +14,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.app:app"]
+CMD ["python", "-m", "flask", "--app", "app.app", "run", "--host=0.0.0.0", "--port=8000"]
