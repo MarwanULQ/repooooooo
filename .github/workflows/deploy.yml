@@ -27,14 +27,6 @@ jobs:
           sudo apt-get install -y ansible
           ansible-galaxy collection install community.docker
 
-      - name: Configure SSH
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/ec2_key
-          chmod 600 ~/.ssh/ec2_key
-
       - name: Set deployment variables
         id: vars
         env:

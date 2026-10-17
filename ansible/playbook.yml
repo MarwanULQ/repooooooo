@@ -4,3 +4,12 @@
 
   roles:
     - docker
+
+  tasks:
+    - name: Copy application Compose file
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../compose.yaml"
+        dest: "{{ deploy_dir }}/compose.yaml"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
