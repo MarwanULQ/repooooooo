@@ -76,13 +76,17 @@ jobs:
           printf '%s\n' "$EC2_SSH_KEY" > "$HOME/.ssh/ec2_key"
           chmod 600 "$HOME/.ssh/ec2_key"
 
+      - name: Set image tag
+        id: image
+        run: echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy with Ansible
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          APP_IMAGE: ghcr.io/${{ github.repository }}:latest
+          APP_IMAGE: ghcr.io/marwanulq/repooooooo:${{ github.sha }}
         run: |
           printf '[app_servers]\n%s ansible_user=%s ansible_ssh_private_key_file=%s ansible_ssh_common_args="-o StrictHostKeyChecking=accept-new"\n' \
             "$EC2_HOST" "$EC2_USER" "$HOME/.ssh/ec2_key" > /tmp/inventory.ini
