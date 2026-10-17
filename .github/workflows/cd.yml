@@ -86,7 +86,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          APP_IMAGE: ghcr.io/marwanulq/repooooooo:${{ github.sha }}
+          APP_IMAGE: ghcr.io/marwanulq/repooooooo:${{ steps.image.outputs.tag }}
         run: |
           printf '[app_servers]\n%s ansible_user=%s ansible_ssh_private_key_file=%s ansible_ssh_common_args="-o StrictHostKeyChecking=accept-new"\n' \
             "$EC2_HOST" "$EC2_USER" "$HOME/.ssh/ec2_key" > /tmp/inventory.ini
