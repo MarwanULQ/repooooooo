@@ -58,3 +58,17 @@ module "ec2" {
   my_ip         = var.my_ip
   app_port      = var.app_port
 }
+
+module "sonarqube" {
+  source = "./modules/sonarqube"
+
+  name          = "sonarqube"
+  environment   = "dev"
+  ami_id        = data.aws_ami.ubuntu.id
+  instance_type = "t3.small"
+  subnet_id     = data.aws_subnets.default.ids[0]
+  vpc_id        = data.aws_vpc.default.id
+  key_name      = var.key_name
+  my_ip         = var.my_ip
+  app_port      = 9000
+}
