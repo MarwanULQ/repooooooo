@@ -35,10 +35,11 @@ jobs:
         run: |
           echo "image=ghcr.io/${GH_REPOSITORY,,}:${COMMIT_SHA:0:7}" >> "$GITHUB_OUTPUT"
 
-      - name: Test SSH connectivity
+      - name: Configure SSH key
         run: |
-          echo "Testing connection to EC2..."
-          nc -vz -w 10 "${{ secrets.EC2_HOST }}" 22
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > "$HOME/.ssh/ec2_key"
+          chmod 600 "$HOME/.ssh/ec2_key"
 
       - name: Deploy using Ansible
         env:
