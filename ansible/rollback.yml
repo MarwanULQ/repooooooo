@@ -1,0 +1,39 @@
+---
+- name: Roll back application image
+  hosts: web
+  become: true
+  vars:
+    deploy_dir: /opt/myapp
+
+  tasks:
+    - name: Require known-good image
+      ansible.builtin.assert:
+        that:
+          - rollback_image is defined
+          - rollback_image is match('^ghcr\\.io/.+@sha256:[0-9a-f]{64}$')
+        fail_msg: "Pass rollback_image as an immutable GHCR image digest."
+
+    - name: Log in to GHCR
+      community.docker.docker_login:
+        registry_url: ghcr.io
+        username: "{{ lookup('env', 'GHCR_USERNAME') }}"
+        password: "{{ lookup('env', 'GHCR_TOKEN') }}"
+      no_log: true
+
+    - name: Pull and start known-good image
+      community.docker.docker_compose_v2:
+        project_src: "{{ deploy_dir }}"
+        state: present
+        pull: always
+        recreate: always
+      environment:
+        APP_IMAGE: "{{ rollback_image }}"
+
+    - name: Verify rollback health
+      ansible.builtin.uri:
+        url: http://127.0.0.1:5000/health
+        status_code: 200
+      register: rollback_health
+      retries: 12
+      delay: 5
+      until: rollback_health.status == 200

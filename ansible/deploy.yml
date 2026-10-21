@@ -1,11 +1,17 @@
 ---
 - name: Deploy application image
-  hosts: app_servers
+  hosts: web
   become: true
   vars:
     deploy_dir: /opt/myapp
 
   tasks:
+    - name: Require immutable application image
+      ansible.builtin.assert:
+        that:
+          - lookup('env', 'APP_IMAGE') is match('^ghcr\\.io/.+@sha256:[0-9a-f]{64}$')
+        fail_msg: "Set APP_IMAGE to an immutable GHCR image digest."
+
     - name: Log in to GHCR
       community.docker.docker_login:
         registry_url: ghcr.io
@@ -26,7 +32,7 @@
 
         - name: Check application health endpoint
           ansible.builtin.uri:
-            url: "http://127.0.0.1:5000/"
+            url: "http://127.0.0.1:5000/health"
             method: GET
             status_code: 200
           register: health_result
