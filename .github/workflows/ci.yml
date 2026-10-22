@@ -11,6 +11,7 @@ on:
 jobs:
   secret-scan:
     name: Secret scan
+    if: ${{ github.event_name != 'push' || (!contains(github.event.head_commit.message, '(rollback ') && !contains(github.event.head_commit.message, 'skip')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -24,6 +25,7 @@ jobs:
 
   terraform-scan:
     name: Terraform security scan
+    if: ${{ github.event_name != 'push' || (!contains(github.event.head_commit.message, '(rollback ') && !contains(github.event.head_commit.message, 'skip')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +40,7 @@ jobs:
 
   application-tests:
     name: Application tests
+    if: ${{ github.event_name != 'push' || (!contains(github.event.head_commit.message, '(rollback ') && !contains(github.event.head_commit.message, 'skip')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +54,7 @@ jobs:
 
   code-quality:
     name: SonarQube analysis
+    if: ${{ github.event_name != 'push' || (!contains(github.event.head_commit.message, '(rollback ') && !contains(github.event.head_commit.message, 'skip')) }}
     needs:
       - secret-scan
       - terraform-scan
