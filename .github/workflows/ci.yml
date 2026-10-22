@@ -1,4 +1,4 @@
-name: CI 
+name: Continuous Integration
 
 on:
   pull_request:
@@ -9,7 +9,21 @@ on:
       - main
 
 jobs:
-  test:
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Scan for leaked secrets
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  terraform-scan:
+    name: Terraform security scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +36,12 @@ jobs:
           quiet: true
           soft_fail: true
 
+  application-tests:
+    name: Application tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -29,8 +49,12 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest tests
 
-  sonarqube:
-    needs: test
+  code-quality:
+    name: SonarQube analysis
+    needs:
+      - secret-scan
+      - terraform-scan
+      - application-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

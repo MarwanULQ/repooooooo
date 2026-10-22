@@ -1,16 +1,16 @@
-name: CD
+name: Continuous Delivery
 
 on:
   workflow_run:
     workflows:
-      - CI
+      - Continuous Integration
     types:
       - completed
     branches:
       - main
 
 jobs:
-  publish:
+  build-and-publish:
     name: Build and publish to GHCR
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
@@ -67,9 +67,9 @@ jobs:
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ steps.sha.outputs.short }}
-  deploy:
+  deploy-application:
     name: Deploy application
-    needs: publish
+    needs: build-and-publish
     runs-on: ubuntu-latest
 
     permissions:
