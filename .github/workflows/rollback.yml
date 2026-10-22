@@ -8,7 +8,7 @@ on:
 jobs:
   rollback:
     name: Roll back application
-    if: ${{ contains(github.event.head_commit.message, '(rollback ') && !contains(github.event.head_commit.message, 'skip') }}
+    if: ${{ (contains(github.event.head_commit.message, '(rollback ') || contains(github.event.head_commit.message, 'rollback [') || startsWith(github.event.head_commit.message, 'rollback ')) && !contains(github.event.head_commit.message, 'skip') }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -24,13 +24,20 @@ jobs:
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          match="$(printf '%s\n' "$COMMIT_MESSAGE" | grep -oE '\(rollback[[:space:]]+[^[:space:]()]+\)' | head -n 1)"
-          if [ -z "$match" ]; then
-            echo 'Commit message must contain (rollback <TAG>).' >&2
+          tag="$(printf '%s\n' "$COMMIT_MESSAGE" | sed -nE 's/^rollback[[:space:]]+([^[:space:]]+).*$/\1/p')"
+          if [ -z "$tag" ]; then
+            tag="$(printf '%s\n' "$COMMIT_MESSAGE" | sed -nE 's/.*rollback[[:space:]]+\[([^]]+)\]\([^)]*\).*/\1/p')"
+          fi
+          if [ -z "$tag" ]; then
+            match="$(printf '%s\n' "$COMMIT_MESSAGE" | grep -oE '\(rollback[[:space:]]+[^[:space:]()]+\)' | head -n 1)"
+            tag="$(printf '%s\n' "$match" | sed -E 's/^\(rollback[[:space:]]+//; s/\)$//')"
+          fi
+
+          if [ -z "$tag" ]; then
+            echo 'Commit message must contain rollback <TAG>.' >&2
             exit 1
           fi
 
-          tag="$(printf '%s\n' "$match" | sed -E 's/^\(rollback[[:space:]]+//; s/\)$//')"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Set image name
