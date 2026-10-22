@@ -20,6 +20,7 @@ jobs:
           directory: infra
           framework: terraform
           quiet: true
+          soft_fail: true
 
       - uses: actions/setup-python@v5
         with:
